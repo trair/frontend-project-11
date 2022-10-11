@@ -8,21 +8,28 @@ const validateLink = (link, feeds) => {
         schema.validateSync(link);
         return null;
     } catch (e) {
-        return e.message;
+        switch (e.message) {
+            case 'this must be a valid URL':
+                return 'invalidUrl';
+            case 'RSS is already exist':
+                return 'existedUrl';
+            default:
+                return e.message;
+        }
     };
 };
 
-const handleAddLink = (e, state) => {
+const handleAddLink = (e, state, i18nInstance) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const link = formData.get('url');
     state.field = link;
-    const errors = validateLink(state.field, state.feeds);
-    state.form.errors = errors;
+    const error = validateLink(state.field, state.feeds);
+    state.form.error = i18nInstance.t(`errors.${error}`);
 
-    console.log(errors);
+    console.log(error);
 
-    if (!errors) {
+    if (!error) {
         state.feeds.push(link);
         state.form.proccessState = 'success';
     } else {
