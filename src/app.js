@@ -5,7 +5,7 @@ import view from './view.js';
 import languages from './locales/index.js';
 
 const app = () => {
-    const defaultLanguage = 'en';
+    const defaultLanguage = 'ru';
     const i18nextInstance = i18next.createInstance();
     i18nextInstance.init({
         lng: defaultLanguage,
@@ -16,18 +16,21 @@ const app = () => {
             mixed: {
                 notOneOf: () => i18nextInstance.t('errors.existedUrl'),
             },
-            string: () => i18nextInstance.t('errors.invalidUrl'),
+            string: {
+                url: () => i18nextInstance.t('errors.invalidUrl'),
+            },
         }));
+        
     const state = {
         lng: defaultLanguage,
         form: {
             valid: true,
             processState: 'filling',
             processError: null,
-            error: {},
-            field: '',
+            error: null,
         },
         feeds: [],
+        posts: [],
     };
 
     const watchedState = view(state, i18nextInstance);
