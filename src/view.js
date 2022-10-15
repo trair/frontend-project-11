@@ -1,49 +1,49 @@
 import onChange from 'on-change';
-import { handleCloseModal, handleViewPost } from './handlers.js'
+import { handleCloseModal, handleViewPost } from './handlers.js';
 
 const renderFeeds = (feeds, i18nextInstance) => {
   const feedsContainer = document.querySelector('.feeds');
   feedsContainer.innerHTML = `<h2>${i18nextInstance.t('feeds')}</h2>`;
-  
+
   const ul = document.createElement('ul');
   ul.classList.add('list-group', 'mb-5');
-  
+
   feeds.forEach((feed) => {
     const li = document.createElement('li');
     li.classList.add('list-group-item');
     li.dataset.id = feed.id;
-  
+
     const feedTitle = document.createElement('h3');
     feedTitle.textContent = feed.title;
     const feedDescription = document.createElement('p');
     feedDescription.textContent = feed.description;
-  
+
     li.append(feedTitle, feedDescription);
     ul.append(li);
   });
   feedsContainer.append(ul);
 };
-  
-const renderPosts = (state ,posts, i18nextInstance) => {
+
+const renderPosts = (state, posts, i18nextInstance) => {
   const postsContainer = document.querySelector('.posts');
   postsContainer.innerHTML = `<h2>${i18nextInstance.t('posts')}</h2>`;
-  
+
   const ul = document.createElement('ul');
   ul.classList.add('list-group');
-  
+
   posts.forEach((post) => {
     const isViewed = state.viewedIds.includes(post.id);
 
     const li = document.createElement('li');
     li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start');
-  
+
     const postTitle = document.createElement('a');
     postTitle.dataset.id = post.id;
     postTitle.textContent = post.title;
     postTitle.setAttribute('href', post.url);
     postTitle.setAttribute('target', '_blank');
     postTitle.classList.add(isViewed ? ('fw-normal', 'link-secondary') : 'fw-bold');
-  
+
     const postViewButton = document.createElement('button');
     postViewButton.textContent = i18nextInstance.t('buttons.view');
     postViewButton.setAttribute('type', 'button');
@@ -62,7 +62,7 @@ const renderPosts = (state ,posts, i18nextInstance) => {
 
       handleViewPost(post);
     });
-  
+
     li.append(postTitle, postViewButton);
     ul.append(li);
   });
@@ -147,4 +147,3 @@ export default (state, i18nextInstance) => {
 
   return watchedState;
 };
-

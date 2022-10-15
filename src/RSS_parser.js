@@ -37,7 +37,7 @@ export const parserRSS = (feedLink, data) => {
       description: feedDescription,
       link: feedLink,
     };
-        
+   
     return result;
   } catch {
     console.log(e);
@@ -52,18 +52,24 @@ const allOrigin = (url) => {
   return result.toString();
 };
 
+export const updateRSS = (link, state) => {
+    links.push(link);
+  
+    setTimeout(() => update(state), 5000);
+  };
+
 export const loadRSS = (link) => axios.get(allOrigin(link))
-.then((response) => parserRSS(link, response.data.contents));
+  .then((response) => parserRSS(link, response.data.contents));
 
 const links = [];
 
 const update = (state) => {
-  const promises = link.map(loadRSS);
+  const promises = state.map(loadRSS);
   Promise.all(promises)
     .them((result) => {
       const loadedPosts = result.flatMap(({ posts }) => posts);
-      const allPosts = _.union(loadedPost, state.posts);
-      const newPosts = _.differenceBy(all.Posts, state.posts, 'url');
+      const allPosts = _.union(loadedPosts, state.posts);
+      const newPosts = _.differenceBy(allPosts, state.posts, 'url');
 
       if (newPosts.length > 0) {
         state.posts = [...newPosts, state.posts];
@@ -72,10 +78,4 @@ const update = (state) => {
     .finally(() => {
       setTimeout(() => updateRSS(state), 5000);
     });
-};
-
-export const updateRSS = (link, state) => {
-  links.push(link);
-
-  setTimeout(() => update(state), 5000);
 };

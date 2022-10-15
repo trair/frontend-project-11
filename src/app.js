@@ -2,7 +2,7 @@ import i18next from 'i18next';
 import { setLocale } from 'yup';
 import { handleAddLink } from './handlers.js';
 import view from './view.js';
-import languages from './locales/index.js';
+import resources  from './locales/index.js';
 
 const app = () => {
   const defaultLanguage = 'ru';
@@ -10,7 +10,7 @@ const app = () => {
   i18nextInstance.init({
     lng: defaultLanguage,
     debug: false,
-    languages,
+    resources ,
   })
   .then(setLocale({
     mixed: {
@@ -20,7 +20,7 @@ const app = () => {
       url: () => i18nextInstance.t('errors.invalidUrl'),
     },
   }));
-        
+
   const state = {
     lng: defaultLanguage,
     form: {
@@ -35,7 +35,7 @@ const app = () => {
   };
 
   const watchedState = view(state, i18nextInstance);
-    
+
   const form = document.querySelector('.rss-form');
   form.addEventListener('submit', (e) => {
     handleAddLink(e, watchedState, i18nextInstance);

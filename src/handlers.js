@@ -10,7 +10,7 @@ const validateLink = (link, feeds) => {
     return null;
   } catch (e) {
     return e.message;
-  };
+  }
 };
 
 export const handleAddLink = (e, state, i18nextInstance) => {
@@ -38,7 +38,7 @@ export const handleAddLink = (e, state, i18nextInstance) => {
         } else {
           state.form.error = i18nextInstance.t('errors.invalidRSS');
         }
-          state.form.proccessState = 'failed';
+        state.form.proccessState = 'failed';
       });
   } else {
     state.form.proccessState = 'failed';
@@ -50,7 +50,7 @@ export const handleViewPost = (post) => {
   document.querySelector('.modal-title').textContent = post.title;
   document.querySelector('.modal-body').innerHTML = post.description;
   document.querySelector('.full-article').href = post.url;
-    
+
   const substrate = document.createElement('div');
   substrate.classList.add('modal-backdrop', 'fade', 'show');
   document.body.append(substrate);
