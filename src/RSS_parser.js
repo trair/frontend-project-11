@@ -46,6 +46,25 @@ export const parseRSS = (feedLink, data) => {
   }
 };
 
+const update = (link) => {
+  const links = [];
+  links.push(link);
+  const promises = state.map(loadRSS);
+  Promise.all(promises)
+    .them((result) => {
+      const loadedPosts = result.flatMap(({ posts }) => posts);
+      const allPosts = _.union(loadedPosts, watchedState.posts);
+      const newPosts = _.differenceBy(allPosts, watchedState.posts, 'link');
+
+      if (newPosts.length > 0) {
+        watchedState.posts = [...newPosts, watchedState.posts];
+      }
+    })
+    .finally(() => {
+      setTimeout(() => updateRSS(link), 5000);
+    });
+};
+
 const allOrigin = (url) => {
   const result = new URL('/get', 'https://allorigins.hexlet.app');
   result.searchParams.set('url', url);
@@ -72,23 +91,3 @@ export const updateRSS = (link, state) => {
 export const loadRSS = (link) => axios.get(allOrigin(link))
   .then((response) => parseRSS(link, response.data.contents))
   .then((parcedData) => addPostId(parcedData));
-
-const update = (link) => {
-  const links = [];
-  links.push(link);
-  const promises = state.map(loadRSS);
-  Promise.all(promises)
-    .them((result) => {
-      const loadedPosts = result.flatMap(({ posts }) => posts);
-      const allPosts = _.union(loadedPosts, watchedState.posts);
-      const newPosts = _.differenceBy(allPosts, watchedState.posts, 'link');
-
-      if (newPosts.length > 0) {
-        watchedState.posts = [...newPosts, watchedState.posts];
-      }
-    })
-    .finally(() => {
-      setTimeout(() => updateRSS(link), 5000);
-    });
-};
-

@@ -1,5 +1,5 @@
 import i18next from 'i18next';
-import { setLocale } from 'yup';
+import yup from 'yup';
 import view from './view.js';
 import resources from './locales/index.js';
 import { loadRSS, updateRSS } from './RSS_parser.js';
