@@ -1,8 +1,8 @@
 import i18next from 'i18next';
 import { setLocale } from 'yup';
-import { handleAddLink } from './handlers.js';
 import view from './view.js';
 import resources  from './locales/index.js';
+import { loadRSS, updateRSS } from './RSS_parser.js';
 
 const app = () => {
   const defaultLanguage = 'ru';
@@ -37,9 +37,48 @@ const app = () => {
 
   const watchedState = view(state, i18nextInstance);
 
+  const validateLink = (url, feeds) => {
+    const urls = feeds.map(({ link }) => link);
+    const schema = yup.string().url().notOneOf(urls);
+  
+    try {
+      schema.validateSync(url);
+      return null;
+    } catch (e) {
+      return e.message;
+    }
+  };
+
   const form = document.querySelector('.rss-form');
   form.addEventListener('submit', (e) => {
-    handleAddLink(e, watchedState, i18nextInstance);
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const link = formData.get('url').trim();
+
+    const error = validateLink(link, watchedState.feeds);
+    watchedState.form.error = error;
+    if (!error) {
+      watchedState.form.processState = 'pending';
+
+      loadRSS(link)
+        .then((rss) => {
+          const { feed, posts } = rss;
+          watchedState.feeds.unshift(feed);
+          watchedState.posts = [...posts, ...watchedState.posts];
+          watchedState.form.processState = 'success';
+          updateRSS(link);
+        })
+        .catch((err) => {
+          if (err.isAxiosError) {
+            watchedState.form.error = i18nextInstance.t('errors.requestErr');
+          } else {
+            watchedState.form.error = i18nextInstance.t('errors.invalidRSS');
+          }
+          watchedState.form.processState = 'failed';
+        });
+    } else {
+      watchedState.form.processState = 'failed';
+    }
   });
 };
 

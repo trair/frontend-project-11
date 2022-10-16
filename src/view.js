@@ -1,5 +1,4 @@
 import onChange from 'on-change';
-import { handleCloseModal, handleViewPost } from './handlers.js';
 
 const renderFeeds = (feeds, i18nextInstance) => {
   const feedsContainer = document.querySelector('.feeds');
@@ -107,79 +106,97 @@ const renderModalClosed = () => {
   modal.removeAttribute('role', 'aria-modal');
 };
 
-const render = (state, i18nextInstance) => {
+const render = (state, viewPostHandler, i18nextInstance) => {
   if (state.feeds.length > 0) {
     renderFeeds(state.feeds, i18nextInstance);
-    renderPosts(state, state.posts, handleViewPost, i18nextInstance);
+    renderPosts(state, state.posts, viewPostHandler, i18nextInstance);
   }
 };
 
-const toggleForm = (status) => {
-  const submitButton = document.querySelector('[type="submit"]');
-  const input = document.querySelector('.form-control');
-
-  submitButton.disable = status;
-  input.readOnly = status;
-};
-
-const clearFeedback = () => {
-  const input = document.querySelector('.form-control');
-  const feedback = document.querySelector('.feedback');
-
-  feedback.textContent = '';
-  feedback.classList.remove('text-danger', 'text-success');
-  input.classList.remove('is-invalid');
-};
-
-export default (state, i18nextInstance) => {
+const renderFeedback = (state, status, i18nextInstance) => {
   const input = document.querySelector('#url-input');
   const feedback = document.querySelector('.feedback');
   const form = document.querySelector('.rss-form');
+  const submitButton = document.querySelector('[type="submit"]');
 
+  const clearFeedback = () => {
+    feedback.textContent = '';
+    feedback.classList.remove('text-danger', 'text-success');
+    input.classList.remove('is-invalid');
+  };
+
+  const toggleForm = (value) => {
+    submitButton.disabled = value;
+    input.readOnly = value;
+  };
+
+  switch (status) {
+    case 'pending':
+      toggleForm(true);
+      clearFeedback();
+      break;
+    case 'failed':
+      input.focus();
+      toggleForm(false);
+      break;
+    case 'success':
+      toggleForm(false);
+      clearFeedback();
+      form.reset();
+      input.focus();
+      feedback.textContent = i18nextInstance.t('success');
+      feedback.classList.add('text-success');
+      break;
+    case 'error':
+      clearFeedback();
+      input.classList.add('is-invalid');
+      feedback.classList.add('text-danger');
+      feedback.textContent = state.form.error;
+      break;
+    case 'clear':
+      clearFeedback();
+      break;
+    default:
+      throw new Error(`Unexpected process status: ${status}`);
+  }
+};
+
+export default (state, i18nextInstance) => {
   const watchedState = onChange(state, (path, value) => {
+    const handleViewPost = (post) => {
+      watchedState.activePostId = post.id;
+      if (!watchedState.viewedIds.includes(post.id)) {
+        watchedState.viewedIds.push(post.id);
+      }
+    };
+
+    const handleCloseModal = () => {
+      watchedState.activePostId = null;
+    };
     if (path === 'form.processState') {
-      switch (value) {
-        case 'pending':
-          toggleForm(true);
-          clearFeedback();
-          break;
-        case 'failed':
-          input.focus();
-          toggleForm(false);
-          break;
-        case 'success':
-          toggleForm(false);
-          clearFeedback();
-          form.reset();
-          input.focus();
-          feedback.textContent = i18nextInstance.t('success');
-          feedback.classList.add('text-success');
-          break;
-        default:
-          throw new Error(`Unexpected process state: ${value}`);
+      if (value) {
+        renderFeedback(state, value, i18nextInstance);
+      } else {
+        throw new Error(`Unexpected process state: ${value}`);
       }
     } else if (path === 'form.error') {
-      feedback.textContent = '';
       if (value) {
-        clearFeedback();
-        input.classList.add('is-invalid');
-        feedback.classList.add('text-danger');
-        feedback.textContent = state.form.error;
+        renderFeedback(state, 'error', i18nextInstance);
       } else {
-        clearFeedback();
+        renderFeedback(state, 'clear', i18nextInstance);
       }
     } else if (path === 'activePostId') {
       if (value) {
-        renderModal(watchedState, handleCloseModal, i18nextInstance);
+        renderModal(state, handleCloseModal, i18nextInstance);
       } else {
-        renderModalClosed(watchedState);
+        renderModalClosed(state);
       }
     } else if (path = 'posts') {
-      renderPosts(watchedState, state.post, handleViewPost, i18nextInstance);
+      renderPosts(state, state.post, handleViewPost, i18nextInstance);
     } else if (path === 'feeds') {
       renderFeeds(state.feeds, i18nextInstance);
     } else {
-      render(watchedState, i18nextInstance);
+      render(state, handleViewPost, i18nextInstance);
     }
   });
 

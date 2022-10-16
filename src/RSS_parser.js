@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import axios from 'axios';
 
-export const parserRSS = (feedLink, data) => {
+export const parseRSS = (feedLink, data) => {
   try {
     const parser = new DOMParser();
     const parsedData = parser.parseFromString(data, 'text/xml');
@@ -66,22 +66,22 @@ export const loadRSS = (link) => axios.get(allOrigin(link))
   .then((response) => parserRSS(link, response.data.contents))
   .then((parcedData) => addPostId(parcedData));
 
-const links = [];
-
-const update = (state, links) => {
+const update = (link) => {
+  const links = []
+  links.push(link)
   const promises = state.map(loadRSS);
   Promise.all(promises)
     .them((result) => {
       const loadedPosts = result.flatMap(({ posts }) => posts);
-      const allPosts = _.union(loadedPosts, state.posts);
-      const newPosts = _.differenceBy(allPosts, state.posts, 'link');
+      const allPosts = _.union(loadedPosts, watchedState.posts);
+      const newPosts = _.differenceBy(allPosts, watchedState.posts, 'link');
 
       if (newPosts.length > 0) {
-        state.posts = [...newPosts, state.posts];
+        watchedState.posts = [...newPosts, watchedState.posts];
       }
     })
     .finally(() => {
-      setTimeout(() => updateRSS(state, links), 5000);
+      setTimeout(() => updateRSS(link), 5000);
     });
 };
 
