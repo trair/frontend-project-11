@@ -21,6 +21,6 @@ $ make build      # сборка проекта (в директорию dist)
 
 ---
 
-# Demo:
+## Demo:
 
 https://frontend-project-11-one.vercel.app/
