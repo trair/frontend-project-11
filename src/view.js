@@ -198,4 +198,3 @@ export default (state, i18nextInstance) => {
   });
   return watchedState;
 };
- 
