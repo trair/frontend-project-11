@@ -1,9 +1,11 @@
+import _ from 'lodash';
+import * as yup from 'yup';
+import axios from 'axios';
 import i18next from 'i18next';
-import yup from 'yup';
 import { setLocale } from 'yup';
 import view from './view.js';
 import resources from './locales/index.js';
-import { loadRSS, updateRSS } from './RSS_parser.js';
+import parseRSS from './RSS_parser.js';
 
 const app = () => {
   const defaultLanguage = 'ru';
@@ -13,14 +15,14 @@ const app = () => {
     debug: false,
     resources,
   })
-  .then(setLocale({
-    mixed: {
-      notOneOf: () => i18nextInstance.t('errors.existedUrl'),
-    },
-    string: {
-      url: () => i18nextInstance.t('errors.invalidUrl'),
-    },
-  }));
+    .then(setLocale({
+      mixed: {
+        notOneOf: () => i18nextInstance.t('errors.existedUrl'),
+      },
+      string: {
+        url: () => i18nextInstance.t('errors.invalidUrl'),
+      },
+    }));
 
   const state = {
     lng: defaultLanguage,
@@ -40,6 +42,7 @@ const app = () => {
 
   const validateLink = (url, feeds) => {
     const urls = feeds.map(({ link }) => link);
+
     const schema = yup.string().url().notOneOf(urls);
 
     try {
@@ -48,6 +51,44 @@ const app = () => {
     } catch (e) {
       return e.message;
     }
+  };
+
+  const allOrigin = (url) => {
+    const result = new URL('/get', 'https://allorigins.hexlet.app');
+    result.searchParams.set('url', url);
+    result.searchParams.set('disableCache', true);
+    return result.toString();
+  };
+
+  const addPostId = (data) => {
+    const postsWithId = data.posts.map((post) => ({
+      id: _.uniqueId(),
+      ...post,
+    }));
+    return { ...data, posts: postsWithId };
+  };
+
+  const loadRSS = (link) => axios.get(allOrigin(link))
+    .then((response) => parseRSS(link, response.data.contents))
+    .then((parsedData) => addPostId(parsedData));
+
+  const updateRSS = (link) => {
+    const links = [];
+    links.push(link);
+    const promises = links.map(loadRSS);
+    Promise.all(promises)
+      .then((results) => {
+        const loadedPosts = results.flatMap(({ posts }) => posts);
+        const allPosts = _.union(loadedPosts, watchedState.posts);
+        const newPosts = _.differenceBy(allPosts, watchedState.posts, 'link');
+
+        if (newPosts.length > 0) {
+          watchedState.posts = [...newPosts, ...watchedState.posts];
+        }
+      })
+      .finally(() => {
+        setTimeout(() => updateRSS(link), 5000);
+      });
   };
 
   const form = document.querySelector('.rss-form');

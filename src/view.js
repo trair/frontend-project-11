@@ -10,7 +10,6 @@ const renderFeeds = (feeds, i18nextInstance) => {
   feeds.forEach((feed) => {
     const li = document.createElement('li');
     li.classList.add('list-group-item');
-    li.dataset.id = feed.id;
 
     const feedTitle = document.createElement('h3');
     feedTitle.textContent = feed.title;
@@ -79,14 +78,13 @@ const renderModal = (state, closeModalHandler, i18nextInstance) => {
 
   const modal = document.querySelector('#modal');
   modal.classList.add('show');
-  modal.getElementsByClassName.display = 'block';
+  modal.style.display = 'block';
   modal.setAttribute('role', 'dialog');
   modal.removeAttribute('aria-hidden');
   modal.setAttribute('aria-modal', 'true');
 
   const closeButtons = document.querySelectorAll('[data-bs-dismiss="modal"]');
   closeButtons[1].textContent = i18nextInstance.t('buttons.close');
-
   closeButtons.forEach((closeButton) => {
     closeButton.addEventListener('click', () => closeModalHandler(state));
   });
@@ -100,7 +98,7 @@ const renderModalClosed = () => {
 
   const modal = document.querySelector('#modal');
   modal.classList.remove('show');
-  modal.getElementsByClassName.display = 'none';
+  modal.style.display = 'none';
   modal.setAttribute('aria-hidden', 'true');
   modal.removeAttribute('role', 'aria-modal');
 };
@@ -190,14 +188,13 @@ export default (state, i18nextInstance) => {
       } else {
         renderModalClosed(state);
       }
-    } else if (path = 'posts') {
-      renderPosts(state, state.post, handleViewPost, i18nextInstance);
+    } else if (path === 'posts') {
+      renderPosts(state, state.posts, handleViewPost, i18nextInstance);
     } else if (path === 'feeds') {
       renderFeeds(state.feeds, i18nextInstance);
     } else {
       render(state, handleViewPost, i18nextInstance);
     }
   });
-
   return watchedState;
 };
