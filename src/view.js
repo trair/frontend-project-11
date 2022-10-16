@@ -50,11 +50,11 @@ const renderPosts = (state, posts, viewPostHandler, i18nextInstance) => {
 
     postTitle.addEventListener('click', () => {
       if (!state.viewedIds.includes(post.id)) {
-        state.viewedIds.push(post.id)
+        state.viewedIds.push(post.id);
       }
     });
 
-    postViewButton.addEventListener('click', () => viewPostHandler(post,state));
+    postViewButton.addEventListener('click', () => viewPostHandler(post, state));
 
     li.append(postTitle, postViewButton);
     ul.append(li);
@@ -64,7 +64,6 @@ const renderPosts = (state, posts, viewPostHandler, i18nextInstance) => {
 
 const renderModal = (state, closeModalHandler, i18nextInstance) => {
   const { title, description, link } = state.posts.find((post) => post.id === state.activePostId);
-
 
   const fullArticleButton = document.querySelector('.full-article');
   fullArticleButton.textContent = i18nextInstance.t('buttons.readArticle');

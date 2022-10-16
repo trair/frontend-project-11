@@ -13,7 +13,7 @@ export default {
     buttons: {
       view: 'Просмотр',
       close: 'Закрыть',
-      readArticle:'Читать полностью',
+      readArticle: 'Читать полностью',
     },
   },
 };

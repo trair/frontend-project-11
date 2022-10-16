@@ -1,7 +1,7 @@
 import i18next from 'i18next';
 import { setLocale } from 'yup';
 import view from './view.js';
-import resources  from './locales/index.js';
+import resources from './locales/index.js';
 import { loadRSS, updateRSS } from './RSS_parser.js';
 
 const app = () => {
@@ -10,7 +10,7 @@ const app = () => {
   i18nextInstance.init({
     lng: defaultLanguage,
     debug: false,
-    resources ,
+    resources,
   })
   .then(setLocale({
     mixed: {
@@ -40,7 +40,7 @@ const app = () => {
   const validateLink = (url, feeds) => {
     const urls = feeds.map(({ link }) => link);
     const schema = yup.string().url().notOneOf(urls);
-  
+
     try {
       schema.validateSync(url);
       return null;

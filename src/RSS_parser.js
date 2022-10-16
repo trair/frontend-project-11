@@ -38,7 +38,7 @@ export const parseRSS = (feedLink, data) => {
       description: feedDescription,
       link: feedLink,
     };
-   
+
     return result;
   } catch (e) {
     console.log(e);
@@ -62,13 +62,20 @@ const addPostId = (data) => {
   return { ...data, posts: postsWithId };
 };
 
+export const updateRSS = (link, state) => {
+  const links = [];
+  links.push(link);
+
+  setTimeout(() => update(state, links), 5000);
+};
+
 export const loadRSS = (link) => axios.get(allOrigin(link))
-  .then((response) => parserRSS(link, response.data.contents))
+  .then((response) => parseRSS(link, response.data.contents))
   .then((parcedData) => addPostId(parcedData));
 
 const update = (link) => {
-  const links = []
-  links.push(link)
+  const links = [];
+  links.push(link);
   const promises = state.map(loadRSS);
   Promise.all(promises)
     .them((result) => {
@@ -85,9 +92,3 @@ const update = (link) => {
     });
 };
 
-export const updateRSS = (link, state) => {
-  const links = [];
-  links.push(link);
-
-  setTimeout(() => update(state, links), 5000);
-};
