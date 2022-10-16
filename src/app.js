@@ -32,6 +32,7 @@ const app = () => {
     feeds: [],
     posts: [],
     viewedIds: [],
+    viewModal: null,
   };
 
   const watchedState = view(state, i18nextInstance);

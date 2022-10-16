@@ -6,6 +6,11 @@ export const parserRSS = (feedLink, data) => {
     const parser = new DOMParser();
     const parsedData = parser.parseFromString(data, 'text/xml');
 
+    const parseError = parsedData.querySelector('parseerror');
+    if (parseError) {
+      throw new Error(parseError.textContent);
+    }
+
     const result = {
       feed: null,
       posts: [],
@@ -13,17 +18,14 @@ export const parserRSS = (feedLink, data) => {
 
     const feedTitle = parsedData.querySelector('title').textContent;
     const feedDescription = parsedData.querySelector('description').textContent;
-    const feedId = _.uniqueId();
 
     const posts = parsedData.querySelectorAll('item');
     posts.forEach((post) => {
       const postTitle = post.querySelector('title').textContent;
       const postDescription = post.querySelector('description').textContent;
       const postLink = post.querySelector('link').textContent;
-      const postId = _.uniqueId();
 
       const postData = {
-        id: postId,
         title: postTitle,
         description: postDescription,
         link: postLink,
@@ -32,14 +34,13 @@ export const parserRSS = (feedLink, data) => {
     });
 
     result.feed = {
-      id: feedId,
       title: feedTitle,
       description: feedDescription,
       link: feedLink,
     };
    
     return result;
-  } catch {
+  } catch (e) {
     console.log(e);
     return null;
   }
@@ -52,30 +53,41 @@ const allOrigin = (url) => {
   return result.toString();
 };
 
-export const updateRSS = (link, state) => {
-    links.push(link);
-  
-    setTimeout(() => update(state), 5000);
-  };
+const addPostId = (data) => {
+  const postsWithId = data.posts.map((post) => ({
+    id: _.uniqueId(),
+    ...post,
+  }));
+
+  return { ...data, posts: postsWithId };
+};
 
 export const loadRSS = (link) => axios.get(allOrigin(link))
-  .then((response) => parserRSS(link, response.data.contents));
+  .then((response) => parserRSS(link, response.data.contents))
+  .then((parcedData) => addPostId(parcedData));
 
 const links = [];
 
-const update = (state) => {
+const update = (state, links) => {
   const promises = state.map(loadRSS);
   Promise.all(promises)
     .them((result) => {
       const loadedPosts = result.flatMap(({ posts }) => posts);
       const allPosts = _.union(loadedPosts, state.posts);
-      const newPosts = _.differenceBy(allPosts, state.posts, 'url');
+      const newPosts = _.differenceBy(allPosts, state.posts, 'link');
 
       if (newPosts.length > 0) {
         state.posts = [...newPosts, state.posts];
       }
     })
     .finally(() => {
-      setTimeout(() => updateRSS(state), 5000);
+      setTimeout(() => updateRSS(state, links), 5000);
     });
+};
+
+export const updateRSS = (link, state) => {
+  const links = [];
+  links.push(link);
+
+  setTimeout(() => update(state, links), 5000);
 };
