@@ -1,11 +1,11 @@
-import _ from 'lodash';
+import _, { camelCase } from 'lodash';
 import * as yup from 'yup';
 import axios from 'axios';
 import i18next from 'i18next';
 import { setLocale } from 'yup';
 import view from './view.js';
 import resources from './locales/index.js';
-import parseRSS from './RSS_parser.js';
+import camelCase from './camelCase.js';
 
 const app = () => {
   const defaultLanguage = 'ru';
@@ -29,7 +29,6 @@ const app = () => {
     form: {
       valid: true,
       processState: 'filling',
-      processError: null,
       error: null,
     },
     feeds: [],
@@ -69,7 +68,7 @@ const app = () => {
   };
 
   const loadRSS = (link) => axios.get(allOrigin(link))
-    .then((response) => parseRSS(link, response.data.contents))
+    .then((response) => camelCase(link, response.data.contents))
     .then((parsedData) => addPostId(parsedData));
 
   const updateRSS = (link) => {
