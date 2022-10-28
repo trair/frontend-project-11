@@ -5,7 +5,7 @@ import i18next from 'i18next';
 import { setLocale } from 'yup';
 import view from './view.js';
 import resources from './locales/index.js';
-import parse from './parser.js';
+import parseRSS from './RSS_parser.js';
 
 const app = () => {
   const defaultLanguage = 'ru';
@@ -68,7 +68,7 @@ const app = () => {
   };
 
   const loadRSS = (link) => axios.get(allOrigin(link))
-    .then((response) => parse(link, response.data.contents))
+    .then((response) => parseRSS(link, response.data.contents))
     .then((parsedData) => addPostId(parsedData));
 
   const updateRSS = (link) => {
