@@ -2,7 +2,7 @@ import onChange from 'on-change';
 
 const renderFeeds = (feeds, i18nextInstance) => {
   const feedsContainer = document.querySelector('.feeds');
-  feedsContainer.textContent = `<h2>${i18nextInstance.t('feeds')}</h2>`;
+  feedsContainer.innerHTML = `<h2>${i18nextInstance.t('feeds')}</h2>`;
 
   const ul = document.createElement('ul');
   ul.classList.add('list-group', 'mb-5');
