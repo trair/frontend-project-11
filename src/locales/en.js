@@ -6,9 +6,14 @@ export default {
       invalidUrl: 'Link should contain a valid URL',
       existedUrl: 'RSS is already exist',
       responseErr: 'Server error (Try again later)',
+      requestErr: 'Network error (Сheck your network connectivity)',
       invalidRSS: 'Invalid RSS source',
     },
     success: 'RSS uploaded successfully',
-    buttons: 'View',
+    buttons: {
+      view: 'View',
+      close: 'Close',
+      readArticle: 'Read the article',
+    },
   },
 };

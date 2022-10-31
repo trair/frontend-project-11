@@ -1,119 +1,126 @@
-import i18next from 'i18next';
-import * as yup from 'yup';
 import _ from 'lodash';
+import * as yup from 'yup';
 import axios from 'axios';
-import ru from './locales/ru.js';
+import i18next from 'i18next';
+import { setLocale } from 'yup';
 import view from './view.js';
+import resources from './locales/index.js';
 import parse from './parser.js';
 
-const setIds = (data) => {
-  const feedId = _.uniqueId();
-  const { title, description } = data.feed;
-  const feed = { feedId, title, description };
-  const posts = data.posts.map((post) => ({ feedId, id: _.uniqueId(), ...post }));
-  return { feed, posts };
-};
-
-const generateURL = (link) => {
-  const url = new URL('https://allorigins.hexlet.app/get');
-  url.searchParams.append('disableCache', 'true');
-  url.searchParams.append('url', link);
-  return url;
-};
-
-const getFeedsPostsFromURL = (link) => axios.get(generateURL(link))
-  .catch(() => {
-    throw new Error('networkError');
-  })
-  .then((response) => {
-    const parsedData = parse(response.data.contents);
-    return setIds(parsedData);
-  })
-  .catch((e) => {
-    throw new Error(e.message);
-  });
-
-export default () => {
-  const intialState = {
-    state: 'intial',
-    error: '',
-    links: [],
-    feeds: [],
-    posts: [],
-    readPostsIds: new Set(),
-    modalPost: {},
-  };
-
+const app = () => {
+  const defaultLanguage = 'ru';
   const i18nextInstance = i18next.createInstance();
   i18nextInstance.init({
-    lng: 'ru',
-    resources: { ru },
-  });
+    lng: defaultLanguage,
+    debug: false,
+    resources,
+  })
+    .then(setLocale({
+      mixed: {
+        notOneOf: () => i18nextInstance.t('errors.existedUrl'),
+      },
+      string: {
+        url: () => i18nextInstance.t('errors.invalidUrl'),
+      },
+    }));
 
-  const state = view(intialState, i18nextInstance);
-
-  yup.setLocale({
-    mixed: {
-      notOneOf: 'duplicate',
-      required: 'required',
+  const state = {
+    lng: defaultLanguage,
+    form: {
+      valid: true,
+      processState: 'filling',
+      error: null,
     },
-    string: {
-      url: 'invalidUrl',
-    },
-  });
+    feeds: [],
+    posts: [],
+    viewedIds: [],
+    viewModal: null,
+  };
 
-  const schema = yup.string().url().required();
+  const watchedState = view(state, i18nextInstance);
 
-  const form = document.querySelector('form.rss-form');
+  const validateLink = (url, feeds) => {
+    const urls = feeds.map(({ link }) => link);
+
+    const schema = yup.string().url().notOneOf(urls);
+
+    try {
+      schema.validateSync(url);
+      return null;
+    } catch (e) {
+      return e.message;
+    }
+  };
+
+  const allOrigin = (url) => {
+    const result = new URL('/get', 'https://allorigins.hexlet.app');
+    result.searchParams.set('url', url);
+    result.searchParams.set('disableCache', true);
+    return result.toString();
+  };
+
+  const addPostId = (data) => {
+    const postsWithId = data.posts.map((post) => ({
+      id: _.uniqueId(),
+      ...post,
+    }));
+    return { ...data, posts: postsWithId };
+  };
+
+  const loadRSS = (link) => axios.get(allOrigin(link))
+    .then((response) => parse(link, response.data.contents))
+    .then((parsedData) => addPostId(parsedData));
+
+  const updateRSS = (link) => {
+    const links = [];
+    links.push(link);
+    const promises = links.map(loadRSS);
+    Promise.all(promises)
+      .then((results) => {
+        const loadedPosts = results.flatMap(({ posts }) => posts);
+        const allPosts = _.union(loadedPosts, watchedState.posts);
+        const newPosts = _.differenceBy(allPosts, watchedState.posts, 'link');
+
+        if (newPosts.length > 0) {
+          watchedState.posts = [...newPosts, ...watchedState.posts];
+        }
+      })
+      .finally(() => {
+        setTimeout(() => updateRSS(link), 5000);
+      });
+  };
+
+  const form = document.querySelector('.rss-form');
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    const inputURL = (e.target.elements.url.value).trim();
+    const formData = new FormData(e.target);
+    const link = formData.get('url').trim();
 
-    schema.notOneOf(state.links).validate(inputURL)
-      .then(() => {
-        state.state = 'loading';
-        return getFeedsPostsFromURL(inputURL);
-      })
-      .then((normalizedData) => {
-        state.feeds.unshift(normalizedData.feed);
-        state.posts.unshift(...normalizedData.posts);
-        state.links.unshift(inputURL);
-        state.state = 'loaded';
-      })
-      .catch((err) => {
-        state.error = err.message;
-        state.state = 'failed';
-      });
-  });
+    const error = validateLink(link, watchedState.feeds);
+    watchedState.form.error = error;
+    if (!error) {
+      watchedState.form.processState = 'pending';
 
-  const postsContainer = document.querySelector('.posts');
-  postsContainer.addEventListener('click', (e) => {
-    const { id } = e.target.dataset;
-    if (!id) return;
-    state.readPostsIds.add(id);
-    const { title, description, link } = state.posts.filter((item) => item.id === id)[0];
-    state.modalPost = { title, description, link };
-  });
-
-  const checkForNewPosts = () => {
-    const promises = state.links
-      .map((link, index) => getFeedsPostsFromURL(link)
-        .then((response) => {
-          const { feedId } = state.feeds[index];
-          const filteredPosts = state.posts.filter((post) => post.feedId === feedId);
-          const currentNewPosts = _.differenceBy(response.posts, filteredPosts, 'title')
-            .map((post) => ({ feedId, id: _.uniqueId, ...post }));
-          if (currentNewPosts.length > 0) {
-            state.posts.unshift(...currentNewPosts);
-            state.state = 'loaded';
-          }
+      loadRSS(link)
+        .then((rss) => {
+          const { feed, posts } = rss;
+          watchedState.feeds.unshift(feed);
+          watchedState.posts = [...posts, ...watchedState.posts];
+          watchedState.form.processState = 'success';
+          updateRSS(link);
         })
         .catch((err) => {
-          state.error = err.message;
-          state.state = 'failed';
-          throw new Error(err.message);
-        }));
-    Promise.all(promises).finally(() => setTimeout(checkForNewPosts, 5000));
-  };
-  setTimeout(checkForNewPosts, 5000);
+          if (err.isAxiosError) {
+            watchedState.form.error = i18nextInstance.t('errors.requestErr');
+          } else {
+            watchedState.form.error = i18nextInstance.t('errors.invalidRSS');
+          }
+          watchedState.form.processState = 'failed';
+        });
+    } else {
+      watchedState.form.processState = 'failed';
+    }
+  });
 };
+
+export default app;

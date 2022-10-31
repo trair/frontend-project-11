@@ -1,13 +1,19 @@
 export default {
   translation: {
-    invalidUrl: 'Ссылка должна быть валидным URL',
-    duplicate: 'RSS уже существует',
-    required: 'Не должно быть пустым',
-    success: 'RSS успешно загружен',
-    networkError: 'Ошибка сети',
-    rssError: 'Ресурс не содержит валидный RSS',
-    posts: 'Посты',
-    postsButton: 'Просмотр',
     feeds: 'Фиды',
+    posts: 'Посты',
+    errors: {
+      invalidUrl: 'Ссылка должна быть валидным URL',
+      existedUrl: 'RSS уже существует',
+      responseErr: 'Ошибка сервера (Попробуйте повторить позднее)',
+      requestErr: 'Ошибка сети (Проверьте ваше подключение к сети)',
+      invalidRSS: 'Ресурс не содержит валидный RSS',
+    },
+    success: 'RSS успешно загружен',
+    buttons: {
+      view: 'Просмотр',
+      close: 'Закрыть',
+      readArticle: 'Читать полностью',
+    },
   },
 };
