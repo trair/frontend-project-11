@@ -68,7 +68,7 @@ const app = () => {
   };
 
   const loadRSS = (link) => axios.get(allOrigin(link))
-    .then((response) => parse(link, response.data.contents))
+    .then((response) => parse(response.data.contents))
     .then((parsedData) => addPostId(parsedData));
 
   const updateRSS = (link) => {

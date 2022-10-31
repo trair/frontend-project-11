@@ -1,4 +1,4 @@
-export default (feedLink, data) => {
+export default (data) => {
   const parser = new DOMParser();
   const parsedData = parser.parseFromString(data, 'text/xml');
   const parseError = parsedData.querySelector('parsererror');
@@ -30,7 +30,6 @@ export default (feedLink, data) => {
   result.feed = {
     title: feedTitle,
     description: feedDescription,
-    link: feedLink,
   };
 
   return result;
