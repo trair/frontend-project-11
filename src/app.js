@@ -111,9 +111,9 @@ const app = () => {
         })
         .catch((err) => {
           if (err.isAxiosError) {
-            watchedState.form.error = i18nextInstance.t('errors.requestErr');
+            watchedState.form.error = 'errors.requestErr';
           } else {
-            watchedState.form.error = i18nextInstance.t('errors.invalidRSS');
+            watchedState.form.error = 'errors.invalidRSS';
           }
           watchedState.form.processState = 'failed';
         });
