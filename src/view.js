@@ -156,7 +156,7 @@ const renderFeedback = (state, status, i18nextInstance) => {
       clearFeedback();
       input.classList.add('is-invalid');
       feedback.classList.add('text-danger');
-      feedback.textContent = state.form.error;
+      feedback.textContent = i18nextInstance.t('errors');
       break;
     case 'clear':
       clearFeedback();
