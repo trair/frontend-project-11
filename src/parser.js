@@ -1,41 +1,34 @@
-export default (feedLink, data) => {
-  try {
-    const parser = new DOMParser();
-    const parsedData = parser.parseFromString(data, 'text/xml');
-    const parseError = parsedData.querySelector('parsererror');
-    if (parseError) {
-      throw new Error(parseError.textContent);
-    }
-    const result = {
-      feed: null,
-      posts: [],
-    };
-
-    const feedTitle = parsedData.querySelector('title').textContent;
-    const feedDescription = parsedData.querySelector('description').textContent;
-
-    const posts = parsedData.querySelectorAll('item');
-    posts.forEach((post) => {
-      const postTitle = post.querySelector('title').textContent;
-      const postDescription = post.querySelector('description').textContent;
-      const postLink = post.querySelector('link').textContent;
-
-      const postData = {
-        title: postTitle,
-        description: postDescription,
-        link: postLink,
-      };
-      result.posts.push(postData);
-    });
-
-    result.feed = {
-      title: feedTitle,
-      description: feedDescription,
-      link: feedLink,
-    };
-    return result;
-  } catch (e) {
-    console.log(e);
-    return null;
+const parseHTML = (data) => {
+  const parser = new DOMParser();
+  const parsedData = parser.parseFromString(data, 'text/xml');
+  const parseError = parsedData.querySelector('parsererror');
+  if (parseError) {
+    throw new Error('errors.invalidRSS');
   }
+
+  return parsedData;
+};
+
+const getFeed = (parsedData) => {
+  const title = parsedData.querySelector('title').textContent;
+  const description = parsedData.querySelector('description').textContent;
+  return { title, description };
+};
+
+const getPosts = (parsedData) => {
+  const posts = parsedData.querySelectorAll('item');
+  return posts.forEach((post) => {
+    const title = post.querySelector('title').textContent;
+    const description = post.querySelector('description').textContent;
+    const link = post.querySelector('link').textContent;
+    return { title, description, link };
+  });
+};
+
+export default (data) => {
+  const parsedData = parseHTML(data);
+  return {
+    feed: getFeed(parsedData),
+    posts: getPosts(parsedData),
+  };
 };
