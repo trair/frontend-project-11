@@ -24,7 +24,7 @@ const renderFeeds = (feeds, i18nextInstance) => {
 
 const renderPosts = (state, posts, viewPostHandler, i18nextInstance) => {
   const postsContainer = document.querySelector('.posts');
-  postsContainer.innerHTML = `<h2>${i18nextInstance.t('posts')}</h2>`;
+  postsContainer.innerHTML = i18nextInstance.t('posts');
 
   const ul = document.createElement('ul');
   ul.classList.add('list-group');
