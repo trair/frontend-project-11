@@ -2,10 +2,10 @@ import onChange from 'on-change';
 
 export default (state, i18nInstance) => {
   const elements = {
-    form: document.querySelector('.rss-form'),
+    form: document.querySelector('form.rss-form'),
     input: document.querySelector('#url-input'),
-    feedback: document.querySelector('.feedback'),
-    submitButton: document.querySelector('[type="submit"]'),
+    button: document.querySelector('#url-submit-button'),
+    outputText: document.querySelector('.feedback'),
     posts: document.querySelector('.posts'),
     feeds: document.querySelector('.feeds'),
     modalTitle: document.querySelector('.modal-title'),
@@ -16,43 +16,37 @@ export default (state, i18nInstance) => {
   const renderPosts = () => {
     const card = document.createElement('div');
     card.classList.add('card', 'border-0');
-
     const cardBody = document.createElement('div');
     cardBody.classList.add('card-body');
-
     const cardTitle = document.createElement('h2');
     cardTitle.classList.add('card-title', 'h4');
     cardTitle.textContent = i18nInstance.t('posts');
-
     cardBody.append(cardTitle);
     card.append(cardBody);
-
     const ul = document.createElement('ul');
     ul.classList.add('list-group', 'border-0', 'rounded-0');
-
     const postsElements = state.posts.map((post) => {
       const li = document.createElement('li');
-      li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0');
-
-      const isViewed = state.viewedIds.has(post.id);
-      const postTitle = document.createElement('a');
-      postTitle.classList.add(isViewed ? ('fw-normal', 'link-secondary') : 'fw-bold');
-      postTitle.setAttribute('href', post.link);
-      postTitle.setAttribute('target', '_blank');
-      postTitle.setAttribute('rel', 'noopener noreferrer');
-
-      postTitle.dataset.id = post.id;
-      postTitle.textContent = post.title;
-
-      const postViewButton = document.createElement('buttom');
-      postViewButton.setAttribute('type', 'button');
-      postViewButton.classList.add('btn', 'btn-outline-primary', 'btn-sm', 'h-100');
-      postViewButton.dataset.bsToggle = 'modal';
-      postViewButton.dataset.bsTarget = '#modal';
-      postViewButton.dataset.id = post.id;
-      postViewButton.textContent = i18nInstance.t('buttons');
-      li.append(postTitle, postViewButton);
-
+      li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'aling-items-start', 'border-0', 'border-end-0');
+      const a = document.createElement('a');
+      if (state.readPostsIds.has(post.id)) {
+        a.classList.add('fw-normal');
+      } else {
+        a.classList.add('fw-bold');
+      }
+      a.setAttribute('href', post.link);
+      a.setAttribute('target', '_blank');
+      a.setAttribute('rel', 'noopener noreferrer');
+      a.dataset.id = post.id;
+      a.textContent = post.title;
+      const button = document.createElement('button');
+      button.setAttribute('type', 'button');
+      button.classList.add('btn', 'btn-outline-primary', 'btn-sm', 'h-100');
+      button.dataset.bsToggle = 'modal';
+      button.dataset.bsTarget = '#modal';
+      button.dataset.id = post.id;
+      button.textContent = i18nInstance.t('postsButton');
+      li.append(a, button);
       return li;
     });
     ul.append(...postsElements);
@@ -63,72 +57,64 @@ export default (state, i18nInstance) => {
   const renderFeeds = () => {
     const card = document.createElement('div');
     card.classList.add('card', 'border-0');
-
     const cardBody = document.createElement('div');
     cardBody.classList.add('card-body');
-
     const cardTitle = document.createElement('h2');
     cardTitle.classList.add('card-title', 'h4');
-    cardTitle.textContent = i18nInstance.t('posts');
-
+    cardTitle.textContent = i18nInstance.t('feeds');
     cardBody.append(cardTitle);
     card.append(cardBody);
-
     const ul = document.createElement('ul');
     ul.classList.add('list-group', 'border-0', 'rounded-0');
-
-    const feedElements = state.feeds.map((feed) => {
+    const feedsElements = state.feeds.map((feed) => {
       const li = document.createElement('li');
       li.classList.add('list-group-item', 'border-0', 'border-end-0');
-
-      const feedTitle = document.createElement('h3');
-      feedTitle.classList.add('h6', 'm-0');
-      feedTitle.textContent = feed.title;
-
-      const feedDescription = document.createElement('p');
-      feedDescription.classList.add('m-0', 'small', 'text-black-50');
-      feedDescription.textContent = feed.description;
-      li.append(feedTitle, feedDescription);
-
+      const h3 = document.createElement('h3');
+      h3.classList.add('h6', 'm-0');
+      h3.textContent = feed.title;
+      const p = document.createElement('p');
+      p.classList.add('m-0', 'small', 'text-black-50');
+      p.textContent = feed.description;
+      li.append(h3, p);
       return li;
     });
-    ul.append(...feedElements);
+    ul.append(...feedsElements);
     card.append(ul);
     elements.feeds.append(card);
   };
 
   const watchedState = onChange(state, (path, value) => {
-    if (path === 'viewModal') {
-      const { title, description, link } = state.viewModal;
+    if (path === 'modalPost') {
+      const { title, description, link } = state.modalPost;
       elements.modalTitle.textContent = title;
       elements.modalBody.textContent = description;
       elements.modalLink.setAttribute('href', link);
       watchedState.state = 'loaded';
     }
-    if (path === 'processState') {
+    if (path === 'state') {
       if (value === 'failed') {
         elements.input.focus();
         elements.input.classList.add('is-invalid');
-        elements.submitButton.classList.remove('disabled');
-        elements.feedback.textContent = i18nInstance.t(watchedState.error);
-        elements.feedback.classList.remove('text-success');
-        elements.feedback.classList.add('text-danger');
+        elements.button.classList.remove('disabled');
+        elements.outputText.textContent = i18nInstance.t(watchedState.error);
+        elements.outputText.classList.remove('text-success');
+        elements.outputText.classList.add('text-danger');
         watchedState.state = 'rendered';
       }
-      if (value === 'processing') {
-        elements.feedback.textContent = '';
-        elements.submitButton.classList.add('disabled');
+      if (value === 'loading') {
+        elements.outputText.textContent = '';
+        elements.button.classList.add('disabled');
         watchedState.error = '';
         watchedState.state = 'rendered';
       }
-      if (value === 'processed') {
+      if (value === 'loaded') {
         elements.form.reset();
         elements.input.focus();
         elements.input.classList.remove('is-invalid');
-        elements.submitButton.classList.remove('disabled');
-        elements.feedback.textContent = i18nInstance.t('success');
-        elements.feedback.classList.remove('text-danger');
-        elements.feedback.classList.add('text-success');
+        elements.button.classList.remove('disabled');
+        elements.outputText.textContent = i18nInstance.t('success');
+        elements.outputText.classList.remove('text-danger');
+        elements.outputText.classList.add('text-success');
         elements.posts.innerHTML = '';
         elements.feeds.innerHTML = '';
         renderPosts(watchedState, elements);
@@ -137,6 +123,5 @@ export default (state, i18nInstance) => {
       }
     }
   });
-
   return watchedState;
 };

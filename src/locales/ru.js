@@ -1,14 +1,13 @@
 export default {
   translation: {
-    feeds: 'Фиды',
-    posts: 'Посты',
-    errors: {
-      invalidUrl: 'Ссылка должна быть валидным URL',
-      existedUrl: 'RSS уже существует',
-      responseErr: 'Ошибка сервера (Попробуйте повторить позднее)',
-      invalidRSS: 'Ресурс не содержит валидный RSS',
-    },
+    invalidUrl: 'Ссылка должна быть валидным URL',
+    duplicate: 'RSS уже существует',
+    required: 'Не должно быть пустым',
     success: 'RSS успешно загружен',
-    buttons: 'Просмотр',
+    networkError: 'Ошибка сети',
+    rssError: 'Ресурс не содержит валидный RSS',
+    posts: 'Посты',
+    postsButton: 'Просмотр',
+    feeds: 'Фиды',
   },
 };
