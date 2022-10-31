@@ -17,10 +17,10 @@ const app = () => {
   })
     .then(setLocale({
       mixed: {
-        notOneOf: 'errors.existedUrl',
+        notOneOf: ('errors.existedUrl'),
       },
       string: {
-        url: 'errors.invalidUrl',
+        url: ('errors.invalidUrl'),
       },
     }));
 
@@ -111,9 +111,9 @@ const app = () => {
         })
         .catch((err) => {
           if (err.isAxiosError) {
-            watchedState.form.error = 'errors.requestErr';
+            watchedState.form.error = i18nextInstance.t('errors.requestErr');
           } else {
-            watchedState.form.error = 'errors.invalidRSS';
+            watchedState.form.error = i18nextInstance.t('errors.invalidRSS');
           }
           watchedState.form.processState = 'failed';
         });
