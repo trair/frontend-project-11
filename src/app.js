@@ -52,7 +52,7 @@ const app = () => {
     }
   };
 
-  const allOrigin = (url) => {
+  const generateURL = (url) => {
     const result = new URL('/get', 'https://allorigins.hexlet.app');
     result.searchParams.set('url', url);
     result.searchParams.set('disableCache', true);
@@ -67,7 +67,7 @@ const app = () => {
     return { ...data, posts: postsWithId };
   };
 
-  const loadRSS = (link) => axios.get(allOrigin(link))
+  const loadRSS = (link) => axios.get(generateURL(link))
     .then((response) => parse(response.data.contents))
     .then((parsedData) => addPostId(parsedData));
 
