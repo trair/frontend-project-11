@@ -113,11 +113,13 @@ export default (state, i18nInstance) => {
         elements.feedback.textContent = i18nInstance.t(watchedState.error);
         elements.feedback.classList.remove('text-success');
         elements.feedback.classList.add('text-danger');
+        watchedState.state = 'rendered';
       }
       if (value === 'processing') {
         elements.feedback.textContent = '';
         elements.submitButton.classList.add('disabled');
         watchedState.error = '';
+        watchedState.state = 'rendered';
       }
       if (value === 'processed') {
         elements.form.reset();
@@ -131,6 +133,7 @@ export default (state, i18nInstance) => {
         elements.feeds.innerHTML = '';
         renderPosts(watchedState, elements);
         renderFeeds(watchedState, elements);
+        watchedState.state = 'rendered';
       }
     }
   });
