@@ -2,7 +2,11 @@ import onChange from 'on-change';
 
 const renderFeeds = (feeds, i18nextInstance) => {
   const feedsContainer = document.querySelector('.feeds');
-  feedsContainer.innerHTML = `<h2>${i18nextInstance.t('feeds')}</h2>`;
+  feedsContainer.innerHTML = '';
+
+  const h2 = document.createElement('h2');
+  h2.classList.add('h2', 'card-title');
+  h2.textContent = i18nextInstance.t('feeds');
 
   const ul = document.createElement('ul');
   ul.classList.add('list-group', 'mb-5');
@@ -19,16 +23,16 @@ const renderFeeds = (feeds, i18nextInstance) => {
     li.append(feedTitle, feedDescription);
     ul.append(li);
   });
-  feedsContainer.append(ul);
+  feedsContainer.append(h2, ul);
 };
 
 const renderPosts = (state, posts, viewPostHandler, i18nextInstance) => {
   const postsContainer = document.querySelector('.posts');
   postsContainer.innerHTML = '';
 
-  const postsTitle = document.createElement('h2');
-  postsTitle.classList.add('h4', 'card-title');
-  postsTitle.textContent = i18nextInstance.t('posts');
+  const h2 = document.createElement('h2');
+  h2.classList.add('h2', 'card-title');
+  h2.textContent = i18nextInstance.t('posts');
 
   const ul = document.createElement('ul');
   ul.classList.add('list-group');
@@ -62,7 +66,7 @@ const renderPosts = (state, posts, viewPostHandler, i18nextInstance) => {
     li.append(postTitle, postViewButton);
     ul.append(li);
   });
-  postsContainer.append(postsTitle, ul);
+  postsContainer.append(h2, ul);
 };
 
 const renderModal = (state, closeModalHandler, i18nextInstance) => {
