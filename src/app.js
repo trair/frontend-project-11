@@ -67,9 +67,17 @@ const app = () => {
     return { ...data, posts: postsWithId };
   };
 
-  const loadRSS = (link) => axios.get(generateURL(link))
-    .then((response) => parse(response.data.contents))
-    .then((parsedData) => addPostId(parsedData));
+    const loadRSS = (link) => axios.get(generateURL(link))
+    .catch(() => {
+      throw new Error('requestErr');
+    })
+    .then((response) => {
+      const parsedData = parse(response.data.contents);
+      return setIds(parsedData);
+    })
+    .catch((e) => {
+      throw new Error(e.message);
+    });
 
   const updateRSS = (link) => {
     const links = [];
