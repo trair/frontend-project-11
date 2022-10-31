@@ -33,7 +33,7 @@ const app = () => {
     },
     feeds: [],
     posts: [],
-    viewedIds: [],
+    viewedIds: new Set(),
     viewModal: null,
   };
 

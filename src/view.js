@@ -30,7 +30,7 @@ const renderPosts = (state, posts, viewPostHandler, i18nextInstance) => {
   ul.classList.add('list-group');
 
   posts.forEach((post) => {
-    const isViewed = state.viewedIds.includes(post.id);
+    const isViewed = state.viewedIds.has(post.id);
 
     const li = document.createElement('li');
     li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start');
@@ -48,8 +48,8 @@ const renderPosts = (state, posts, viewPostHandler, i18nextInstance) => {
     postViewButton.classList.add('btn', 'btn-primary', 'btn-sm');
 
     postTitle.addEventListener('click', () => {
-      if (!state.viewedIds.includes(post.id)) {
-        state.viewedIds.push(post.id);
+      if (!state.viewedIds.has(post.id)) {
+        state.viewedIds.add(post.id);
       }
     });
 
@@ -162,8 +162,8 @@ export default (state, i18nextInstance) => {
   const watchedState = onChange(state, (path, value) => {
     const handleViewPost = (post) => {
       watchedState.activePostId = post.id;
-      if (!watchedState.viewedIds.includes(post.id)) {
-        watchedState.viewedIds.push(post.id);
+      if (!watchedState.viewedIds.has(post.id)) {
+        watchedState.viewedIds.add(post.id);
       }
     };
 
