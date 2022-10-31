@@ -17,10 +17,10 @@ const app = () => {
   })
     .then(setLocale({
       mixed: {
-        notOneOf: () => i18nextInstance.t('errors.existedUrl'),
+        notOneOf: 'errors.existedUrl',
       },
       string: {
-        url: () => i18nextInstance.t('errors.invalidUrl'),
+        url: 'errors.invalidUrl',
       },
     }));
 
