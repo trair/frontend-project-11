@@ -1,36 +1,24 @@
 export default (data) => {
   const parser = new DOMParser();
   const parsedData = parser.parseFromString(data, 'text/xml');
-  const parseError = parsedData.querySelector('parsererror');
-  if (parseError) {
-    throw new Error(parseError.textContent);
+  const parsingError = parsedData.querySelector('parsererror');
+  if (parsingError) {
+    throw new Error('parsingError');
   }
-  const result = {
-    feed: null,
-    posts: [],
+
+  const feed = {
+    name: parsedData.querySelector('title').textContent,
+    description: parsedData.querySelector('description').textContent,
   };
 
-  const feedTitle = parsedData.querySelector('title').textContent;
-  const feedDescription = parsedData.querySelector('description').textContent;
+  const items = [...parsedData.querySelectorAll('item')];
+  const posts = items.map((item) => (
+    {
+      title: item.querySelector('title').textContent,
+      description: item.querySelector('description').textContent,
+      link: item.querySelector('link').textContent,
+    }
+  ));
 
-  const posts = parsedData.querySelectorAll('item');
-  posts.forEach((post) => {
-    const postTitle = post.querySelector('title').textContent;
-    const postDescription = post.querySelector('description').textContent;
-    const postLink = post.querySelector('link').textContent;
-
-    const postData = {
-      title: postTitle,
-      description: postDescription,
-      link: postLink,
-    };
-    result.posts.push(postData);
-  });
-
-  result.feed = {
-    title: feedTitle,
-    description: feedDescription,
-  };
-
-  return result;
+  return { feed, posts };
 };
