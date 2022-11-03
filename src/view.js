@@ -1,72 +1,82 @@
 import onChange from 'on-change';
 
-const renderFeeds = (feeds, i18nextInstance) => {
-  const feedsContainer = document.querySelector('.feeds');
-  feedsContainer.innerHTML = '';
+const renderFeeds = () => {
+  const card = document.createElement('div');
+  card.classList.add('card', 'border-0');
 
-  const h2 = document.createElement('h2');
-  h2.classList.add('h2', 'card-title');
-  h2.textContent = i18nextInstance.t('feeds');
+  const cardBody = document.createElement('div');
+  cardBody.classList.add('card-body');
+
+  const cardTitle = document.createElement('h2');
+  cardTitle.classList.add('card-title', 'h4');
+
+  cardTitle.textContent = i18nInstance.t('feeds');
+  cardBody.append(cardTitle);
+  card.append(cardBody);
 
   const ul = document.createElement('ul');
-  ul.classList.add('list-group', 'mb-5');
-
-  feeds.forEach((feed) => {
+  ul.classList.add('list-group', 'border-0', 'rounded-0');
+  const feedsElements = state.feeds.map((feed) => {
     const li = document.createElement('li');
-    li.classList.add('list-group-item');
+    li.classList.add('list-group-item', 'border-0', 'border-end-0');
+    const h3 = document.createElement('h3');
+    h3.classList.add('h6', 'm-0');
+    h3.textContent = feed.title;
+    const p = document.createElement('p');
+    p.classList.add('m-0', 'small', 'text-black-50');
+    p.textContent = feed.description;
+    li.append(h3, p);
 
-    const feedTitle = document.createElement('h3');
-    feedTitle.textContent = feed.title;
-    const feedDescription = document.createElement('p');
-    feedDescription.textContent = feed.description;
-
-    li.append(feedTitle, feedDescription);
-    ul.append(li);
+    return li;
   });
-  feedsContainer.append(h2, ul);
+  ul.append(...feedsElements);
+  card.append(ul);
+  feedsContainer.append(card);
 };
 
-const renderPosts = (state, posts, viewPostHandler, i18nextInstance) => {
-  const postsContainer = document.querySelector('.posts');
-  postsContainer.innerHTML = '';
+const renderPosts = () => {
+  const card = document.createElement('div');
+  card.classList.add('card', 'border-0');
 
-  const h2 = document.createElement('h2');
-  h2.classList.add('h2', 'card-title');
-  h2.textContent = i18nextInstance.t('posts');
+  const cardBody = document.createElement('div');
+  cardBody.classList.add('card-body');
+
+  const cardTitle = document.createElement('h2');
+  cardTitle.classList.add('card-title', 'h4');
+  cardTitle.textContent = i18nInstance.t('posts');
+
+  cardBody.append(cardTitle);
+  card.append(cardBody);
 
   const ul = document.createElement('ul');
-  ul.classList.add('list-group');
-
-  posts.forEach((post) => {
-    const isViewed = state.viewedIds.has(post.id);
-
+  ul.classList.add('list-group', 'border-0', 'rounded-0');
+  const postsElements = state.posts.map((post) => {
     const li = document.createElement('li');
-    li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start');
-
+    li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'aling-items-start', 'border-0', 'border-end-0');
     const postTitle = document.createElement('a');
-    postTitle.dataset.id = post.id;
-    postTitle.textContent = post.title;
+    if (state.readPostsIds.has(post.id)) {
+      postTitle.classList.add('fw-normal');
+    } else {
+      postTitle.classList.add('fw-bold');
+    }
     postTitle.setAttribute('href', post.link);
     postTitle.setAttribute('target', '_blank');
-    postTitle.classList.add(isViewed ? ('fw-normal', 'link-secondary') : 'fw-bold');
+    postTitle.dataset.id = post.id;
+    postTitle.textContent = post.title;
+    const button = document.createElement('button');
+    button.setAttribute('type', 'button');
+    button.classList.add('btn', 'btn-outline-primary', 'btn-sm', 'h-100');
+    button.dataset.bsToggle = 'modal';
+    button.dataset.bsTarget = '#modal';
+    button.dataset.id = post.id;
+    button.textContent = i18nInstance.t('postsButton');
+    li.append(postTitle, button);
 
-    const postViewButton = document.createElement('button');
-    postViewButton.textContent = i18nextInstance.t('buttons.view');
-    postViewButton.setAttribute('type', 'button');
-    postViewButton.classList.add('btn', 'btn-primary', 'btn-sm');
-
-    postTitle.addEventListener('click', () => {
-      if (!state.viewedIds.has(post.id)) {
-        state.viewedIds.add(post.id);
-      }
-    });
-
-    postViewButton.addEventListener('click', () => viewPostHandler(post, state));
-
-    li.append(postTitle, postViewButton);
-    ul.append(li);
+    return li;
   });
-  postsContainer.append(h2, ul);
+  ul.append(...postsElements);
+  card.append(ul);
+  postsContainer.append(card);
 };
 
 const renderModal = (state, closeModalHandler, i18nextInstance) => {
