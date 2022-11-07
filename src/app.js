@@ -27,7 +27,7 @@ const app = () => {
   const state = {
     lng: defaultLanguage,
     form: {
-      processState: 'intial',
+      processState: 'filling',
       error: null,
     },
     links: [],
