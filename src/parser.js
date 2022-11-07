@@ -3,7 +3,7 @@ export default (data) => {
   const parsedData = parser.parseFromString(data, 'text/xml');
   const parsingError = parsedData.querySelector('parsererror');
   if (parsingError) {
-    throw new Error('parsingError');
+    throw new Error('errors.invalidRSS');
   }
 
   const feed = {
